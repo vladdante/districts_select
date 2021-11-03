@@ -7,28 +7,30 @@
              @click="showDistricts"
       >
       <button v-if="search.length" @click="clearSearch"/>
-    </div>
-    <p v-if="$v.selected_districts.$error" class="error">Выберите хотя бы один район</p>
-    <div v-if="selected_districts.length" class="districts-selected">
-      <label v-for="district in selected_districts"
-             :key="district"
-             @click="removeDistrict(district)"
-      >
-        {{ district }}
-      </label>
+      <p v-if="$v.selected_districts.$error" class="error">Выберите хотя бы один район</p>
     </div>
     <div v-if="districts_show" class="districts">
-      <div class="district"
-           v-for="(district, index) in filterDistricts"
-           :key="index"
-      >
-        <input :id="'checkbox' + index"
-               type="checkbox"
-               :disabled="isDisabled(district)"
-               :value="district"
-               v-model="selected_districts"
+      <div v-if="selected_districts.length" class="districts-selected">
+        <label v-for="district in selected_districts"
+               :key="district"
+               @click="removeDistrict(district)"
         >
-        <label :for="'checkbox' + index">{{ district }}</label>
+          {{ district }}
+        </label>
+      </div>
+      <div class="districts-list">
+        <div class="district"
+             v-for="(district, index) in filterDistricts"
+             :key="index"
+        >
+          <input :id="'checkbox' + index"
+                 type="checkbox"
+                 :disabled="isDisabled(district)"
+                 :value="district"
+                 v-model="selected_districts"
+          >
+          <label :for="'checkbox' + index" v-html="matchDistrict(district)"/>
+        </div>
       </div>
     </div>
   </div>
@@ -74,6 +76,12 @@ export default {
     },
     isDisabled(district) {
       return this.disabled_districts.includes(district)
+    },
+    matchDistrict(district) {
+      let reggie = new RegExp(this.search, "ig")
+      if (this.search) {
+        return "<div class='found'>" + district.replace(reggie, "<b>" + this.search + "</b>") + "</div>"
+      } else { return district }
     },
     removeDistrict(district) {
       this.selected_districts = this.selected_districts.filter(item => item !== district)
